@@ -58,7 +58,31 @@ elif args['digestuser'] is not None and args['digestpass'] is not None:
   session.auth = HTTPDigestAuth(args['digestuser'],args['digestpass'])
   r = session.get(args['link'], verify=False)
 elif args['cookie'] is not None:
-  cookies = dict(cookies_are=args['cookie'])
+  cookies = {}
+
+  # Check to see if the cookie has a semicolon, if so there might be mutiple cookies
+  if re.search(';', args['cookie']):
+    cookielist = args['cookie'].split(';')
+
+
+    # Loop through list of cookies
+    for jnlpcookies in cookielist:
+
+      # If there isn't an equal and some sort of content, then it isn't a valid cookie, otherwise add to list of cookies
+      if re.search('[a-zA-Z0-9]', jnlpcookies) and re.search('[=]', jnlpcookies):
+        cookieparts = jnlpcookies.split('=')
+        cookies[cookieparts[0]] = '"' + cookieparts[1] + '"'
+
+  else:
+
+    # Check to see if cookie has =, if not it is malformed and send dummy cookie
+    # If so, split at the = into correct name/value pairs
+    if re.search('=', args['cookie']):
+      cookielist = args['cookie'].split('=')
+      cookies[cookielist[0]] = '"' + cookielist[1] + '"'
+    else:
+      cookies['jnlp'] = 'jnlpdownloader'
+
   r = session.get(args['link'], cookies=cookies, verify=False)
 else:
   r = session.get(args['link'], verify=False)
@@ -69,6 +93,8 @@ if r.status_code is not 200:
   exit(0)
 
 xmltree = ''
+xmlroot = ''
+jnlpurl = ''
 
 # Attempt to read the JNLP XML, if this fails then exit
 try:
@@ -78,8 +104,14 @@ except:
   exit(0)
 
 # Get the XML document structure and pull out the main link
-xmlroot = xmltree.getroot()
-jnlpurl = xmlroot.attrib['codebase']+'/'
+
+try:
+  xmlroot = xmltree.getroot()
+  jnlpurl = xmlroot.attrib['codebase']+'/'
+except:
+  print '[*] JNLP file was misformed, exiting.'
+  exit(0)
+
 jnlplinks = []
 i = 0
 
