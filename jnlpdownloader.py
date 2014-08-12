@@ -167,10 +167,12 @@ for nativelibs in xmlroot.iter('nativelib'):
 for link in jnlplinks:
 
   # Make a request for the file
+  print '[+] Attempting to download: '+jnlpurl+link[0]
   jnlpresp = session.get(jnlpurl + link[0])
 
   # If the request succeeded, then write the JAR to disk
   if jnlpresp.status_code == 200:
+    print '[-] Saving file: '+link[2]
     output = open(link[2], 'wb')
     output.write(jnlpresp.content)
     output.close()
@@ -180,10 +182,12 @@ for link in jnlplinks:
     if link[1] is not None:
 
       # Make a request for the file
+      print '[+] Attempting to download: '+jnlpurl+link[1]
       jnlpresp = session.get(jnlpurl + link[1])
 
       # If the request succeeded, then write the JAR to disk
       if jnlpresp.status_code == 200:
+        print '[-] Saving file: '+link[2]
         output = open(link[2], 'wb')
         output.write(jnlpresp.content)
         output.close()
@@ -192,10 +196,12 @@ for link in jnlplinks:
     if link[3] is not None and link[4] is not None:
 
       # Make a request for the file
+      print '[+] Attempting to download: '+jnlpurl+link[3]
       jnlpresp = session.get(jnlpurl + link[3])
 
       # If the request succeeded, then write the JAR to disk
       if jnlpresp.status_code == 200:
+        print '[-] Saving file: '+link[4]
         output = open(link[4], 'wb')
         output.write(jnlpresp.content)
         output.close()
