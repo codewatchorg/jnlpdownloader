@@ -71,7 +71,7 @@ elif args['cookie'] is not None:
       # If there isn't an equal and some sort of content, then it isn't a valid cookie, otherwise add to list of cookies
       if re.search('[a-zA-Z0-9]', jnlpcookies) and re.search('[=]', jnlpcookies):
         cookieparts = jnlpcookies.split('=')
-        cookies[cookieparts[0]] = '"' + cookieparts[1] + '"'
+        cookies[cookieparts[0]] = cookieparts[1]
 
   else:
 
@@ -79,7 +79,7 @@ elif args['cookie'] is not None:
     # If so, split at the = into correct name/value pairs
     if re.search('=', args['cookie']):
       cookielist = args['cookie'].split('=')
-      cookies[cookielist[0]] = '"' + cookielist[1] + '"'
+      cookies[cookielist[0]] = cookielist[1]
     else:
       cookies['jnlp'] = 'jnlpdownloader'
 
