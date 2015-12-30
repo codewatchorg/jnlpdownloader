@@ -7,6 +7,9 @@ import argparse
 import xml.etree.ElementTree as ET
 import re
 import requests
+import string
+import random
+import os
 from requests.auth import HTTPBasicAuth
 from requests.auth import HTTPDigestAuth
 from requests_ntlm import HttpNtlmAuth
@@ -45,6 +48,9 @@ parser.add_argument('--cookie',
 args = vars(parser.parse_args())
 r = ''
 session = requests.Session()
+
+# Random value for directory creation
+randDir = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(10))
 
 # Check to see if BASIC/DIGEST/NTLM/Cookie authentication is being performed
 # If so, pass credentials to session, if not, just connect to JNLP URL
@@ -98,19 +104,37 @@ jnlpurl = ''
 
 # Attempt to read the JNLP XML, if this fails then exit
 try:
-  xmltree = ET.ElementTree(ET.fromstring(r.text))
+  xmltree = ET.ElementTree(ET.fromstring(r.content))
 except:
   print '[*] JNLP file was misformed, exiting.'
   exit(0)
 
 # Get the XML document structure and pull out the main link
-
 try:
   xmlroot = xmltree.getroot()
   jnlpurl = xmlroot.attrib['codebase']+'/'
 except:
   print '[*] JNLP file was misformed, exiting.'
   exit(0)
+
+# If the JNLP file was good, create directory to store JARs
+# First get the path delimeter for the OS
+path_delim = ''
+if 'posix' in os.name:
+  path_delim = '/'
+else:
+  path_delim = '\\'
+
+# Next, try to create the directory or default to current
+try:
+  if not os.path.exists(os.getcwd() + path_delim + randDir):
+    os.mkdir(os.getcwd() + path_delim + randDir)
+  else:
+    print '[*] Random directory already exists, defaulting to current.'
+    randDir = '.'
+except:
+  print '[*] Failed to create random directory, defaulting to current.'
+  randDir = '.'
 
 jnlplinks = []
 i = 0
@@ -172,8 +196,8 @@ for link in jnlplinks:
 
   # If the request succeeded, then write the JAR to disk
   if jnlpresp.status_code == 200:
-    print '[-] Saving file: '+link[2]
-    output = open(link[2], 'wb')
+    print '[-] Saving file: '+link[2]+' to '+randDir
+    output = open(randDir+'/'+link[2], 'wb')
     output.write(jnlpresp.content)
     output.close()
   else:
@@ -187,8 +211,8 @@ for link in jnlplinks:
 
       # If the request succeeded, then write the JAR to disk
       if jnlpresp.status_code == 200:
-        print '[-] Saving file: '+link[2]
-        output = open(link[2], 'wb')
+        print '[-] Saving file: '+link[2]+' to '+randDir
+        output = open(randDir+'/'+link[2], 'wb')
         output.write(jnlpresp.content)
         output.close()
 
@@ -201,7 +225,7 @@ for link in jnlplinks:
 
       # If the request succeeded, then write the JAR to disk
       if jnlpresp.status_code == 200:
-        print '[-] Saving file: '+link[4]
-        output = open(link[4], 'wb')
+        print '[-] Saving file: '+link[4]+' to '+randDir
+        output = open(randDir+'/'+link[4], 'wb')
         output.write(jnlpresp.content)
         output.close()
