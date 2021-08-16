@@ -54,16 +54,16 @@ randDir = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.d
 
 # Check to see if BASIC/DIGEST/NTLM/Cookie authentication is being performed
 # If so, pass credentials to session, if not, just connect to JNLP URL
-if args['ntlmuser'] is not None and args['ntlmpass'] is not None:
+if args['ntlmuser'] != None and args['ntlmpass'] != None:
   session.auth = HttpNtlmAuth(args['ntlmuser'],args['ntlmpass'], session)
   r = session.get(args['link'], verify=False)
-elif args['basicuser'] is not None and args['basicpass'] is not None:
+elif args['basicuser'] != None and args['basicpass'] != None:
   session.auth = HTTPBasicAuth(args['basicuser'],args['basicpass'])
   r = session.get(args['link'], verify=False)
-elif args['digestuser'] is not None and args['digestpass'] is not None:
+elif args['digestuser'] != None and args['digestpass'] != None:
   session.auth = HTTPDigestAuth(args['digestuser'],args['digestpass'])
   r = session.get(args['link'], verify=False)
-elif args['cookie'] is not None:
+elif args['cookie'] != None:
   cookies = {}
 
   # Check to see if the cookie has a semicolon, if so there might be mutiple cookies
@@ -94,8 +94,8 @@ else:
   r = session.get(args['link'], verify=False)
 
 # If the status code is not 200, the file was likely inaccessible so we exit
-if r.status_code is not 200:
-  print '[*] Link was inaccessible, exiting.'
+if r.status_code != 200:
+  print('[*] Link was inaccessible, exiting.')
   exit(0)
 
 xmltree = ''
@@ -106,7 +106,7 @@ jnlpurl = ''
 try:
   xmltree = ET.ElementTree(ET.fromstring(r.content))
 except:
-  print '[*] JNLP file was misformed, exiting.'
+  print('[*] JNLP file was misformed, exiting.')
   exit(0)
 
 # Get the XML document structure and pull out the main link
@@ -114,7 +114,7 @@ try:
   xmlroot = xmltree.getroot()
   jnlpurl = xmlroot.attrib['codebase']+'/'
 except:
-  print '[*] JNLP file was misformed, exiting.'
+  print('[*] JNLP file was misformed, exiting.')
   exit(0)
 
 # If the JNLP file was good, create directory to store JARs
@@ -130,10 +130,10 @@ try:
   if not os.path.exists(os.getcwd() + path_delim + randDir):
     os.mkdir(os.getcwd() + path_delim + randDir)
   else:
-    print '[*] Random directory already exists, defaulting to current.'
+    print('[*] Random directory already exists, defaulting to current.')
     randDir = '.'
 except:
-  print '[*] Failed to create random directory, defaulting to current.'
+  print('[*] Failed to create random directory, defaulting to current.')
   randDir = '.'
 
 jnlplinks = []
@@ -191,41 +191,41 @@ for nativelibs in xmlroot.iter('nativelib'):
 for link in jnlplinks:
 
   # Make a request for the file
-  print '[+] Attempting to download: '+jnlpurl+link[0]
+  print('[+] Attempting to download: '+jnlpurl+link[0])
   jnlpresp = session.get(jnlpurl + link[0])
 
   # If the request succeeded, then write the JAR to disk
   if jnlpresp.status_code == 200:
-    print '[-] Saving file: '+link[2]+' to '+randDir
+    print('[-] Saving file: '+link[2]+' to '+randDir)
     output = open(randDir+'/'+link[2], 'wb')
     output.write(jnlpresp.content)
     output.close()
   else:
 
     # If the straight request didn't succeed, try to download with version info
-    if link[1] is not None:
+    if link[1] != None:
 
       # Make a request for the file
-      print '[+] Attempting to download: '+jnlpurl+link[1]
+      print('[+] Attempting to download: '+jnlpurl+link[1])
       jnlpresp = session.get(jnlpurl + link[1])
 
       # If the request succeeded, then write the JAR to disk
       if jnlpresp.status_code == 200:
-        print '[-] Saving file: '+link[2]+' to '+randDir
+        print('[-] Saving file: '+link[2]+' to '+randDir)
         output = open(randDir+'/'+link[2], 'wb')
         output.write(jnlpresp.content)
         output.close()
 
     # If the straight request didn't succeed, try to download with alternate name
-    if link[3] is not None and link[4] is not None:
+    if link[3] != None and link[4] != None:
 
       # Make a request for the file
-      print '[+] Attempting to download: '+jnlpurl+link[3]
+      print('[+] Attempting to download: '+jnlpurl+link[3])
       jnlpresp = session.get(jnlpurl + link[3])
 
       # If the request succeeded, then write the JAR to disk
       if jnlpresp.status_code == 200:
-        print '[-] Saving file: '+link[4]+' to '+randDir
+        print('[-] Saving file: '+link[4]+' to '+randDir)
         output = open(randDir+'/'+link[4], 'wb')
         output.write(jnlpresp.content)
         output.close()
